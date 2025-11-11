@@ -4,7 +4,7 @@ Endpoints: CRUD de fornecedores
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.fornecedor_dao import FornecedorDAO
+from dao_mysql.fornecedor_dao import FornecedorDAO
 from service.fornecedor_service import FornecedorService
 from service.auth_service import token_required, funcionario_required, admin_required
 

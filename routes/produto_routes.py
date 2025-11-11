@@ -4,7 +4,7 @@ Endpoints: CRUD de produtos + upload de imagens
 """
 
 from flask import Blueprint, request, jsonify, current_app
-from dao_sqlite.produto_dao import ProdutoDAO
+from dao_mysql.produto_dao import ProdutoDAO
 from service.produto_service import ProdutoService
 from service.auth_service import token_required, admin_required, funcionario_required
 

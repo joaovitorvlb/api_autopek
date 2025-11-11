@@ -4,10 +4,10 @@ Endpoints: Gerenciamento de pedidos de compra (entrada de estoque)
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.pedido_compra_dao import PedidoCompraDAO
-from dao_sqlite.item_pedido_compra_dao import ItemPedidoCompraDAO
-from dao_sqlite.fornecedor_dao import FornecedorDAO
-from dao_sqlite.produto_dao import ProdutoDAO
+from dao_mysql.pedido_compra_dao import PedidoCompraDAO
+from dao_mysql.item_pedido_compra_dao import ItemPedidoCompraDAO
+from dao_mysql.fornecedor_dao import FornecedorDAO
+from dao_mysql.produto_dao import ProdutoDAO
 from service.pedido_compra_service import PedidoCompraService
 from service.auth_service import token_required, funcionario_required
 

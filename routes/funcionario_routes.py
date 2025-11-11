@@ -4,9 +4,9 @@ Endpoints CRUD para funcionários com autenticação
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.funcionario_dao import FuncionarioDAO
-from dao_sqlite.usuario_dao import UsuarioDAO
-from dao_sqlite.nivel_acesso_dao import NivelAcessoDAO
+from dao_mysql.funcionario_dao import FuncionarioDAO
+from dao_mysql.usuario_dao import UsuarioDAO
+from dao_mysql.nivel_acesso_dao import NivelAcessoDAO
 from service.funcionario_service import FuncionarioService
 from service.auth_service import token_required, admin_required, funcionario_required
 

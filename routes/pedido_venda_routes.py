@@ -4,10 +4,10 @@ Endpoints: Gerenciamento de pedidos de venda (saída de estoque)
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.pedido_venda_dao import PedidoVendaDAO
-from dao_sqlite.item_pedido_venda_dao import ItemPedidoVendaDAO
-from dao_sqlite.cliente_dao import ClienteDAO
-from dao_sqlite.produto_dao import ProdutoDAO
+from dao_mysql.pedido_venda_dao import PedidoVendaDAO
+from dao_mysql.item_pedido_venda_dao import ItemPedidoVendaDAO
+from dao_mysql.cliente_dao import ClienteDAO
+from dao_mysql.produto_dao import ProdutoDAO
 from service.pedido_venda_service import PedidoVendaService
 from service.auth_service import token_required, funcionario_required
 

@@ -4,7 +4,7 @@ Endpoints: login, logout, verificação de token
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.usuario_dao import UsuarioDAO
+from dao_mysql.usuario_dao import UsuarioDAO
 from service.auth_service import AuthService, token_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')

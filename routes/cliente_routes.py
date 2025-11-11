@@ -4,9 +4,9 @@ Endpoints CRUD para clientes com autenticação
 """
 
 from flask import Blueprint, request, jsonify
-from dao_sqlite.cliente_dao import ClienteDAO
-from dao_sqlite.usuario_dao import UsuarioDAO
-from dao_sqlite.nivel_acesso_dao import NivelAcessoDAO
+from dao_mysql.cliente_dao import ClienteDAO
+from dao_mysql.usuario_dao import UsuarioDAO
+from dao_mysql.nivel_acesso_dao import NivelAcessoDAO
 from service.cliente_service import ClienteService
 from service.auth_service import token_required, admin_required, funcionario_required
 
