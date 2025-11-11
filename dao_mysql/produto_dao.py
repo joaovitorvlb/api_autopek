@@ -59,6 +59,9 @@ class ProdutoDAO:
                 """,
                 (nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem, id_produto),
             )
+        
+        # Buscar e retornar o produto atualizado
+        return self.buscar_por_id(id_produto)
 
     def deletar_produto(self, id_produto):
         with get_cursor() as cur:
