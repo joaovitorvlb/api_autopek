@@ -19,9 +19,35 @@ from datetime import timedelta
 # Configuração de expiração do token (pode ser sobrescrito no app.py)
 TOKEN_EXPIRATION_HOURS = 24
 
-# Blacklist de tokens (em produção, usar Redis)
-# Com flask-jwt-extended, usamos o jti (JWT ID) para invalidar tokens
+# Blacklist de tokens (usando banco de dados para persistência)
+# Mantemos o set em memória como cache, mas sincronizamos com o banco
 token_blacklist = set()
+
+
+def _get_db_cursor():
+    """Helper para obter cursor do banco ativo (MySQL ou SQLite)"""
+    try:
+        from dao_mysql.db_pythonanywhere import get_cursor
+        return get_cursor
+    except:
+        from dao_sqlite.db import get_cursor
+        return get_cursor
+
+
+def _ensure_blacklist_table():
+    """Garante que a tabela de blacklist existe"""
+    try:
+        get_cursor = _get_db_cursor()
+        with get_cursor() as cursor:
+            # Tenta criar a tabela (ignora se já existir)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS token_blacklist (
+                    jti VARCHAR(255) PRIMARY KEY,
+                    revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+    except Exception as e:
+        print(f"⚠️  Erro ao criar tabela de blacklist: {e}")
 
 
 class AuthService:
@@ -89,17 +115,31 @@ class AuthService:
     def invalidar_token(jti):
         """
         Adiciona JTI (JWT ID) à blacklist (logout).
-        Com flask-jwt-extended, cada token tem um 'jti' único.
+        Persiste no banco de dados para funcionar entre workers/reinicializações.
         
         Args:
             jti (str): JWT ID do token a ser invalidado
         """
+        # Adiciona ao cache em memória
         token_blacklist.add(jti)
+        
+        # Persiste no banco de dados
+        try:
+            _ensure_blacklist_table()
+            get_cursor = _get_db_cursor()
+            with get_cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO token_blacklist (jti) VALUES (%s) ON DUPLICATE KEY UPDATE jti=jti",
+                    (jti,)
+                )
+        except Exception as e:
+            print(f"⚠️  Erro ao adicionar token à blacklist no banco: {e}")
     
     @staticmethod
     def token_esta_na_blacklist(jti):
         """
         Verifica se o token está na blacklist.
+        Primeiro verifica o cache em memória, depois o banco de dados.
         
         Args:
             jti (str): JWT ID do token
@@ -107,7 +147,24 @@ class AuthService:
         Returns:
             bool: True se está na blacklist
         """
-        return jti in token_blacklist
+        # Verifica cache em memória primeiro
+        if jti in token_blacklist:
+            return True
+        
+        # Verifica no banco de dados
+        try:
+            get_cursor = _get_db_cursor()
+            with get_cursor(commit=False) as cursor:
+                cursor.execute("SELECT 1 FROM token_blacklist WHERE jti = %s", (jti,))
+                result = cursor.fetchone()
+                if result:
+                    # Adiciona ao cache para próximas verificações
+                    token_blacklist.add(jti)
+                    return True
+        except Exception as e:
+            print(f"⚠️  Erro ao verificar blacklist no banco: {e}")
+        
+        return False
     
     @staticmethod
     def login(usuario_dao, email, senha):

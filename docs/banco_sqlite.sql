@@ -192,6 +192,19 @@ CREATE INDEX idx_item_venda_pedido ON Item_Pedido_Venda(id_pedido_venda);
 CREATE INDEX idx_item_venda_produto ON Item_Pedido_Venda(id_produto);
 
 -- ============================================================
+-- TABELA DE CONTROLE: Token Blacklist (JWT)
+-- ============================================================
+
+-- Tabela para armazenar tokens JWT revogados (logout)
+-- Necessária para invalidar tokens entre múltiplos workers/processos
+CREATE TABLE token_blacklist (
+    jti VARCHAR(255) PRIMARY KEY,
+    revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_token_revoked_at ON token_blacklist(revoked_at);
+
+-- ============================================================
 -- DADOS INICIAIS (Seed Data)
 -- ============================================================
 

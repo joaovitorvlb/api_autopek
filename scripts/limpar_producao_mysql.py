@@ -309,6 +309,15 @@ def resetar_banco_mysql():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """)
             
+            # Tabela token_blacklist (para logout/invalidação de tokens JWT)
+            cur.execute("""
+                CREATE TABLE token_blacklist (
+                    jti VARCHAR(255) PRIMARY KEY COMMENT 'JWT ID do token revogado',
+                    revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Data/hora da revogação',
+                    KEY idx_revoked_at (revoked_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            
             print("  ✅ Estrutura do banco criada do zero (Nova Modelagem)")
             
             # 3. Inserir dados padrão
