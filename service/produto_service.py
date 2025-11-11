@@ -226,61 +226,67 @@ class ProdutoService:
         Returns:
             dict: {'success': True, 'produto': dict} ou {'success': False, 'message': str}
         """
-        # Buscar produto
-        produto = produto_dao.buscar_por_id(id_produto)
-        if not produto:
-            return {'success': False, 'message': 'Produto não encontrado'}
-        
-        # Validar campos fornecidos
-        if 'nome' in kwargs:
-            validacao = ProdutoService.validar_nome(kwargs['nome'])
-            if not validacao['valido']:
-                return {'success': False, 'message': validacao['mensagem']}
-            kwargs['nome'] = kwargs['nome'].strip()
-        
-        if 'preco' in kwargs:
-            validacao = ProdutoService.validar_preco(kwargs['preco'])
-            if not validacao['valido']:
-                return {'success': False, 'message': validacao['mensagem']}
-            kwargs['preco_venda'] = validacao['preco']
-            del kwargs['preco']  # Remover 'preco' e usar 'preco_venda'
-        
-        if 'estoque' in kwargs:
-            validacao = ProdutoService.validar_estoque(kwargs['estoque'])
-            if not validacao['valido']:
-                return {'success': False, 'message': validacao['mensagem']}
-            kwargs['estoque_atual'] = validacao['estoque']
-            del kwargs['estoque']  # Remover 'estoque' e usar 'estoque_atual'
-        
-        if 'descricao' in kwargs and kwargs['descricao']:
-            kwargs['descricao'] = kwargs['descricao'].strip()
-        
-        # Mesclar dados atuais com atualizações
-        dados_atualizados = {**produto, **kwargs}
-        
-        # Atualizar produto com todos os campos obrigatórios do DAO
-        produto_atualizado = produto_dao.atualizar_produto(
-            id_produto,
-            dados_atualizados['nome'],
-            dados_atualizados.get('descricao', ''),
-            dados_atualizados['sku'],
-            dados_atualizados['preco_venda'],
-            dados_atualizados.get('preco_custo_medio', 0),
-            dados_atualizados['estoque_atual'],
-            dados_atualizados.get('nome_imagem')
-        )
-        
-        if not produto_atualizado:
-            return {'success': False, 'message': 'Erro ao atualizar produto'}
-        
-        # Processar URLs de imagem com host da requisição
-        produto_processado = ProdutoService.process_product_images(produto_atualizado, request_host)
-        
-        return {
-            'success': True,
-            'message': 'Produto atualizado com sucesso',
-            'produto': produto_processado
-        }
+        try:
+            # Buscar produto
+            produto = produto_dao.buscar_por_id(id_produto)
+            if not produto:
+                return {'success': False, 'message': 'Produto não encontrado'}
+            
+            # Validar campos fornecidos
+            if 'nome' in kwargs:
+                validacao = ProdutoService.validar_nome(kwargs['nome'])
+                if not validacao['valido']:
+                    return {'success': False, 'message': validacao['mensagem']}
+                kwargs['nome'] = kwargs['nome'].strip()
+            
+            if 'preco' in kwargs:
+                validacao = ProdutoService.validar_preco(kwargs['preco'])
+                if not validacao['valido']:
+                    return {'success': False, 'message': validacao['mensagem']}
+                kwargs['preco_venda'] = validacao['preco']
+                del kwargs['preco']  # Remover 'preco' e usar 'preco_venda'
+            
+            if 'estoque' in kwargs:
+                validacao = ProdutoService.validar_estoque(kwargs['estoque'])
+                if not validacao['valido']:
+                    return {'success': False, 'message': validacao['mensagem']}
+                kwargs['estoque_atual'] = validacao['estoque']
+                del kwargs['estoque']  # Remover 'estoque' e usar 'estoque_atual'
+            
+            if 'descricao' in kwargs and kwargs['descricao']:
+                kwargs['descricao'] = kwargs['descricao'].strip()
+            
+            # Mesclar dados atuais com atualizações
+            dados_atualizados = {**produto, **kwargs}
+            
+            # Atualizar produto com todos os campos obrigatórios do DAO
+            produto_atualizado = produto_dao.atualizar_produto(
+                id_produto,
+                dados_atualizados['nome'],
+                dados_atualizados.get('descricao', ''),
+                dados_atualizados['sku'],
+                dados_atualizados['preco_venda'],
+                dados_atualizados.get('preco_custo_medio', 0),
+                dados_atualizados['estoque_atual'],
+                dados_atualizados.get('nome_imagem')
+            )
+            
+            if not produto_atualizado:
+                return {'success': False, 'message': 'Erro ao atualizar produto no banco de dados'}
+            
+            # Processar URLs de imagem com host da requisição
+            produto_processado = ProdutoService.process_product_images(produto_atualizado, request_host)
+            
+            return {
+                'success': True,
+                'message': 'Produto atualizado com sucesso',
+                'produto': produto_processado
+            }
+        except Exception as e:
+            print(f"❌ Erro em atualizar_produto: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'message': f'Erro ao processar atualização: {str(e)}'}
     
     @staticmethod
     def processar_e_salvar_imagem(imagem_file, produto_id):

@@ -6,7 +6,7 @@ class ProdutoDAO:
 
     def listar_produtos(self):
         """Lista todos os produtos"""
-        with get_cursor() as cur:
+        with get_cursor(commit=False) as cur:
             sql = "SELECT id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem FROM Produto"
             cur.execute(sql)
             rows = cur.fetchall()
@@ -28,7 +28,7 @@ class ProdutoDAO:
 
     def buscar_produto(self, id_produto):
         """Busca um produto específico pelo ID"""
-        with get_cursor() as cur:
+        with get_cursor(commit=False) as cur:
             sql = "SELECT id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem FROM Produto WHERE id_produto = %s"
             cur.execute(sql, (id_produto,))
             row = cur.fetchone()

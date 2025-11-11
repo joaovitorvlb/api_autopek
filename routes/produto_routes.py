@@ -216,18 +216,24 @@ def atualizar_produto(usuario_atual, id_produto):
     }
     """
     try:
+        print(f"📝 Recebendo atualização para produto ID: {id_produto}")
         dados = request.get_json()
+        print(f"📦 Dados recebidos: {dados}")
         
         if not dados:
+            print("⚠️ Nenhum dado fornecido")
             return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
         
         # Atualizar produto
+        print(f"🔄 Chamando ProdutoService.atualizar_produto...")
         resultado = ProdutoService.atualizar_produto(
             produto_dao,
             id_produto,
             request_host=request.host_url.rstrip('/'),
             **dados
         )
+        
+        print(f"✅ Resultado: {resultado}")
         
         if resultado['success']:
             return jsonify(resultado), 200
@@ -236,6 +242,9 @@ def atualizar_produto(usuario_atual, id_produto):
             return jsonify(resultado), status_code
     
     except Exception as e:
+        print(f"❌ Erro na rota de atualização: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'message': f'Erro ao atualizar produto: {str(e)}'
