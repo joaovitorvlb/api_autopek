@@ -24,8 +24,9 @@ from routes import (
     pedido_venda_bp
 )
 
-# Importar inicialização do banco
-from dao_sqlite.db import init_db, close_db_connection
+# Importar inicialização dos bancos
+from dao_sqlite.db import init_db as init_sqlite, close_db_connection
+from dao_mysql.db_pythonanywhere import init_db as init_mysql
 
 
 # Configuração das resoluções de imagem
@@ -78,8 +79,13 @@ def create_app():
     def revoked_token_callback(jwt_header, jwt_payload):
         return {'message': 'Token foi revogado (logout realizado)'}, 401
     
-    # Inicializar banco de dados SQLite
-    init_db()
+    # Inicializar bancos de dados
+    try:
+        init_mysql()  # Tenta MySQL primeiro (produção)
+        print("✅ MySQL inicializado com sucesso")
+    except Exception as e:
+        print(f"⚠️  MySQL não disponível, usando SQLite: {e}")
+        init_sqlite()  # Fallback para SQLite (desenvolvimento)
     
     # Registrar teardown para fechar conexão ao fim da requisição
     app.teardown_appcontext(close_db_connection)
