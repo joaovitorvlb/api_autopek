@@ -1,0 +1,116 @@
+# ========================
+# Arquivos de banco SQLite
+# ========================
+*.db
+*.sqlite3
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.session.sql
+banco_api.*
+instance/
+data/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ========================
+# Ambiente virtual
+# ========================
+venv/
+env/
+.venv/
+.env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ========================
+# Arquivos temporários e cache
+# ========================
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.bak
+*.tmp
+*.cache
+.cache/
+*.DS_Store
+Thumbs.db
+
+# ========================
+# IDEs e ferramentas
+# ========================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.spyderproject
+.ropeproject
+*.code-workspace
+
+# ========================
+# Build e distribuição
+# ========================
+build/
+dist/
+*.egg-info/
+.eggs/
+MANIFEST
+*.manifest
+*.spec
+
+# ========================
+# Testes
+# ========================
+.coverage
+htmlcov/
+.tox/
+.nox/
+pytest_cache/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ========================
+# Flask / Django
+# ========================
+instance/
+*.log
+*.pid
+*.seed
+db.sqlite3
+*.db-journal
+migrations/__pycache__/
+
+# ========================
+# Arquivos de sistema
+# ========================
+*.orig
+*.rej
+*~
+
+# ========================
+# Arquivos específicos do projeto
+# ========================
+banco_api.sqlite
+banco_api.sqlite-shm
+banco_api.sqlite-wal
+banco_api.session.sql
+
+# ========================
+# Imagens de produtos (uploads)
+# ========================
+static/images/produtos/*.jpg
+static/images/produtos/*.jpeg
+static/images/produtos/*.png
+static/images/produtos/*.gif
+static/images/produtos/*.bmp
+static/images/produtos/*.webp
+static/images/produtos/produto_*
+# Manter o README.md para instruções
+!static/images/produtos/README.md
