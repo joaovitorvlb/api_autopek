@@ -55,6 +55,7 @@ class FornecedorDAO:
             Dicionário com dados do fornecedor ou None se não encontrado
         """
         try:
+            print(f"🔍 FornecedorDAO.buscar_por_id chamado com ID={id_fornecedor}")
             with get_cursor(commit=False) as cursor:
                 cursor.execute("""
                     SELECT id_fornecedor, razao_social, nome_fantasia, cnpj, 
@@ -64,9 +65,10 @@ class FornecedorDAO:
                 """, (id_fornecedor,))
                 
                 row = cursor.fetchone()
+                print(f"   Row retornada: {row}")
                 if row:
                     # MySQL retorna tupla, então precisamos converter para dict
-                    return {
+                    resultado = {
                         'id_fornecedor': row[0],
                         'razao_social': row[1],
                         'nome_fantasia': row[2],
@@ -77,9 +79,15 @@ class FornecedorDAO:
                         'ativo': bool(row[7]),
                         'data_criacao': row[8].isoformat() if row[8] else None
                     }
+                    print(f"✅ Fornecedor encontrado: {resultado}")
+                    return resultado
+                print(f"⚠️ Fornecedor não encontrado")
                 return None
         except Exception as e:
-            return False
+            print(f"❌ Erro em FornecedorDAO.buscar_por_id: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     def buscar_por_cnpj(self, cnpj: str) -> Optional[dict]:
         """
@@ -115,7 +123,10 @@ class FornecedorDAO:
                     }
                 return None
         except Exception as e:
-            return False
+            print(f"❌ Erro em FornecedorDAO.buscar_por_cnpj: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     def listar_todos(self, apenas_ativos: bool = True) -> List[dict]:
         """
@@ -158,7 +169,10 @@ class FornecedorDAO:
                     'data_criacao': row[8].isoformat() if row[8] else None
                 } for row in rows]
         except Exception as e:
-            return False
+            print(f"❌ Erro em FornecedorDAO.listar_todos: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return []
 
     def buscar_por_nome(self, nome: str, apenas_ativos: bool = True) -> List[dict]:
         """
@@ -203,7 +217,10 @@ class FornecedorDAO:
                     'data_criacao': row[8].isoformat() if row[8] else None
                 } for row in rows]
         except Exception as e:
-            return False
+            print(f"❌ Erro em FornecedorDAO.buscar_por_nome: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return []
 
     def atualizar(self, id_fornecedor: int, razao_social: str = None, 
                   nome_fantasia: str = None, cnpj: str = None, email: str = None,
@@ -266,7 +283,10 @@ class FornecedorDAO:
                 
                 return cursor.rowcount > 0
         except Exception as e:
-            return None
+            print(f"❌ Erro em FornecedorDAO.atualizar: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
 
     def desativar(self, id_fornecedor: int) -> bool:
         """
