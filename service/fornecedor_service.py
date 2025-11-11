@@ -82,27 +82,38 @@ class FornecedorService:
             dict: {'success': bool, 'message': str, 'fornecedor': dict}
         """
         try:
+            print(f"📝 FornecedorService.criar_fornecedor chamado")
+            print(f"   Dados: razao_social={razao_social}, nome_fantasia={nome_fantasia}, cnpj={cnpj}")
+            
             # Validar campos obrigatórios
             if not razao_social or not razao_social.strip():
+                print("❌ Razão social vazia")
                 return {'success': False, 'message': 'Razão social é obrigatória'}
             
             if not nome_fantasia or not nome_fantasia.strip():
+                print("❌ Nome fantasia vazio")
                 return {'success': False, 'message': 'Nome fantasia é obrigatório'}
             
             # Validar CNPJ
+            print(f"🔍 Validando CNPJ: {cnpj}")
             validacao = self.validar_cnpj(cnpj)
             if not validacao['valido']:
+                print(f"❌ CNPJ inválido: {validacao['mensagem']}")
                 return {'success': False, 'message': validacao['mensagem']}
             
             # Verificar se CNPJ já existe
+            print(f"🔍 Verificando se CNPJ já existe...")
             fornecedor_existente = self.fornecedor_dao.buscar_por_cnpj(cnpj)
+            print(f"   Resultado busca: {fornecedor_existente}")
             if fornecedor_existente:
+                print("❌ CNPJ já cadastrado")
                 return {
                     'success': False,
                     'message': 'CNPJ já cadastrado'
                 }
             
             # Criar fornecedor
+            print(f"💾 Criando fornecedor no banco...")
             id_fornecedor = self.fornecedor_dao.criar(
                 razao_social=razao_social,
                 nome_fantasia=nome_fantasia,
@@ -111,21 +122,28 @@ class FornecedorService:
                 telefone=telefone,
                 endereco=endereco
             )
+            print(f"   ID retornado: {id_fornecedor}")
             
             if id_fornecedor:
+                print(f"🔍 Buscando fornecedor criado ID={id_fornecedor}")
                 fornecedor = self.fornecedor_dao.buscar_por_id(id_fornecedor)
+                print(f"   Fornecedor: {fornecedor}")
                 return {
                     'success': True,
                     'message': 'Fornecedor criado com sucesso',
                     'fornecedor': fornecedor
                 }
             else:
+                print("❌ Erro: DAO retornou None")
                 return {
                     'success': False,
-                    'message': 'Erro ao criar fornecedor'
+                    'message': 'Erro ao criar fornecedor no banco de dados'
                 }
         
         except Exception as e:
+            print(f"❌ Exceção em criar_fornecedor: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {
                 'success': False,
                 'message': f'Erro ao criar fornecedor: {str(e)}'

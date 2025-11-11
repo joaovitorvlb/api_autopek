@@ -28,14 +28,20 @@ class FornecedorDAO:
             ID do fornecedor criado ou None se houver erro
         """
         try:
+            print(f"💾 FornecedorDAO.criar chamado")
+            print(f"   Params: razao_social={razao_social}, nome_fantasia={nome_fantasia}, cnpj={cnpj}")
             with get_cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO Fornecedor (razao_social, nome_fantasia, cnpj, email, telefone, endereco)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (razao_social, nome_fantasia, cnpj, email, telefone, endereco))
                 
+                print(f"✅ Fornecedor criado, lastrowid={cursor.lastrowid}")
                 return cursor.lastrowid
         except Exception as e:
+            print(f"❌ Erro em FornecedorDAO.criar: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def buscar_por_id(self, id_fornecedor: int) -> Optional[dict]:
