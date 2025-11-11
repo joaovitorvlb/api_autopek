@@ -37,6 +37,18 @@ class ProdutoDAO:
     def buscar_por_id(self, id_produto):
         """Alias para buscar_produto (compatibilidade)"""
         return self.buscar_produto(id_produto)
+    
+    def buscar_por_nome(self, nome):
+        """Busca produtos por nome (case-insensitive, busca parcial)"""
+        with get_cursor(commit=False) as cur:
+            sql = """
+                SELECT id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem 
+                FROM Produto 
+                WHERE nome LIKE %s
+            """
+            cur.execute(sql, (f'%{nome}%',))
+            rows = cur.fetchall()
+            return [dict(row) for row in rows]
 
     def atualizar_produto(self, id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem=None):
         with get_cursor() as cur:
@@ -51,6 +63,11 @@ class ProdutoDAO:
     def deletar_produto(self, id_produto):
         with get_cursor() as cur:
             cur.execute("DELETE FROM Produto WHERE id_produto = %s;", (id_produto,))
+    
+    def deletar(self, id_produto):
+        """Alias para deletar_produto (compatibilidade)"""
+        self.deletar_produto(id_produto)
+        return True
 
     def inserir_produto_obj(self, produto):
         return self.inserir_produto(
