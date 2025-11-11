@@ -333,9 +333,8 @@ def resetar_banco_mysql():
                         (SELECT id_nivel_acesso FROM nivel_acesso WHERE nome = 'admin'))
             """, (senha_hash,))
             
-            # Obter ID do usuário admin
-            cur.execute("SELECT LAST_INSERT_ID()")
-            id_usuario_admin = cur.fetchone()[0]
+            # Obter ID do usuário admin usando lastrowid
+            id_usuario_admin = cur.lastrowid
             
             # Criar funcionário vinculado ao admin (para pedidos de compra)
             cur.execute("""
