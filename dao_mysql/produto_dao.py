@@ -33,6 +33,10 @@ class ProdutoDAO:
             cur.execute(sql, (id_produto,))
             row = cur.fetchone()
             return row
+    
+    def buscar_por_id(self, id_produto):
+        """Alias para buscar_produto (compatibilidade)"""
+        return self.buscar_produto(id_produto)
 
     def atualizar_produto(self, id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem=None):
         with get_cursor() as cur:
