@@ -11,6 +11,10 @@ class ProdutoDAO:
             cur.execute(sql)
             rows = cur.fetchall()
             return rows
+    
+    def listar_todos(self):
+        """Alias para listar_produtos (compatibilidade)"""
+        return self.listar_produtos()
 
     def inserir_produto(self, id_produto, nome, descricao, sku, preco_venda, preco_custo_medio, estoque_atual, nome_imagem=None):
         with get_cursor() as cur:
