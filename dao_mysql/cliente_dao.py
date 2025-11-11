@@ -3,7 +3,7 @@ DAO para Cliente - Apenas operações de banco de dados
 Nova modelagem: Cliente herda de Usuario (1-para-1 via id_usuario)
 Regras de negócio devem estar no módulo service
 """
-from .db import get_cursor
+from .db_pythonanywhere import get_cursor
 
 class ClienteDAO:
     """DAO para operações CRUD na tabela Cliente"""

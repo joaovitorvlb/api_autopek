@@ -3,7 +3,7 @@ DAO para manipulação da tabela Fornecedor no MySQL
 """
 
 from typing import List, Optional
-from dao_mysql.db_pythonanywhere import get_cursor
+from .db_pythonanywhere import get_cursor
 
 
 class FornecedorDAO:

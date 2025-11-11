@@ -1,4 +1,4 @@
-from .db import get_cursor
+from .db_pythonanywhere import get_cursor
 
 class ProdutoDAO:
     def __init__(self):

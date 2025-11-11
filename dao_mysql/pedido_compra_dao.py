@@ -4,7 +4,7 @@ DAO para manipulação da tabela Pedido_Compra no MySQL
 
 from typing import List, Optional
 from datetime import datetime
-from dao_mysql.db_pythonanywhere import get_cursor
+from .db_pythonanywhere import get_cursor
 
 
 class PedidoCompraDAO:

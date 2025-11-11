@@ -3,7 +3,7 @@ DAO para usuario - Apenas operações de banco de dados
 Nova modelagem: Usuario é a base para Cliente e Funcionario (herança)
 Regras de negócio devem estar no módulo service
 """
-from .db import get_cursor
+from .db_pythonanywhere import get_cursor
 
 class UsuarioDAO:
     """DAO para operações CRUD na tabela usuario"""
