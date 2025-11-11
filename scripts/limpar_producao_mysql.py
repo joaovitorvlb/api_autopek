@@ -115,6 +115,7 @@ def resetar_banco_mysql():
             cur.execute("DROP TABLE IF EXISTS Funcionario")
             cur.execute("DROP TABLE IF EXISTS usuario")
             cur.execute("DROP TABLE IF EXISTS nivel_acesso")
+            cur.execute("DROP TABLE IF EXISTS token_blacklist")
             print("  ✅ Tabelas removidas")
             
             # Reabilitar verificação de chaves estrangeiras
