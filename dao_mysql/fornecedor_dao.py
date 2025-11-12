@@ -30,11 +30,17 @@ class FornecedorDAO:
         try:
             print(f"💾 FornecedorDAO.criar chamado")
             print(f"   Params: razao_social={razao_social}, nome_fantasia={nome_fantasia}, cnpj={cnpj}")
+            
+            # Limpar CNPJ antes de inserir (remover formatação)
+            import re
+            cnpj_limpo = re.sub(r'\D', '', cnpj)
+            print(f"   CNPJ limpo para inserção: {cnpj_limpo}")
+            
             with get_cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO Fornecedor (razao_social, nome_fantasia, cnpj, email, telefone, endereco)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                """, (razao_social, nome_fantasia, cnpj, email, telefone, endereco))
+                """, (razao_social, nome_fantasia, cnpj_limpo, email, telefone, endereco))
                 
                 print(f"✅ Fornecedor criado, lastrowid={cursor.lastrowid}")
                 return cursor.lastrowid
@@ -57,6 +63,7 @@ class FornecedorDAO:
         try:
             print(f"🔍 FornecedorDAO.buscar_por_id chamado com ID={id_fornecedor}")
             with get_cursor(commit=False) as cursor:
+                print(f"   Executando query...")
                 cursor.execute("""
                     SELECT id_fornecedor, razao_social, nome_fantasia, cnpj, 
                            email, telefone, endereco, ativo, data_criacao
@@ -65,7 +72,8 @@ class FornecedorDAO:
                 """, (id_fornecedor,))
                 
                 row = cursor.fetchone()
-                print(f"   Row retornada: {row}")
+                print(f"   Row fetchone: {row}")
+                print(f"   Row type: {type(row)}")
                 if row:
                     # MySQL retorna tupla, então precisamos converter para dict
                     resultado = {
@@ -81,7 +89,7 @@ class FornecedorDAO:
                     }
                     print(f"✅ Fornecedor encontrado: {resultado}")
                     return resultado
-                print(f"⚠️ Fornecedor não encontrado")
+                print(f"⚠️ Nenhum fornecedor encontrado com ID={id_fornecedor}")
                 return None
         except Exception as e:
             print(f"❌ Erro em FornecedorDAO.buscar_por_id: {str(e)}")
@@ -100,17 +108,25 @@ class FornecedorDAO:
             Dicionário com dados do fornecedor ou None se não encontrado
         """
         try:
+            print(f"🔍 FornecedorDAO.buscar_por_cnpj chamado com CNPJ={cnpj}")
+            # Limpar CNPJ (remover pontuação)
+            import re
+            cnpj_limpo = re.sub(r'\D', '', cnpj)
+            print(f"   CNPJ limpo: {cnpj_limpo}")
+            
             with get_cursor(commit=False) as cursor:
+                # Buscar tanto pelo CNPJ formatado quanto pelo CNPJ sem formatação
                 cursor.execute("""
                     SELECT id_fornecedor, razao_social, nome_fantasia, cnpj, 
                            email, telefone, endereco, ativo, data_criacao
                     FROM Fornecedor
-                    WHERE cnpj = %s
-                """, (cnpj,))
+                    WHERE cnpj = %s OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '/', ''), '-', '') = %s
+                """, (cnpj, cnpj_limpo))
                 
                 row = cursor.fetchone()
+                print(f"   Row: {row}")
                 if row:
-                    return {
+                    resultado = {
                         'id_fornecedor': row[0],
                         'razao_social': row[1],
                         'nome_fantasia': row[2],
@@ -121,6 +137,9 @@ class FornecedorDAO:
                         'ativo': bool(row[7]),
                         'data_criacao': row[8].isoformat() if row[8] else None
                     }
+                    print(f"✅ Fornecedor encontrado por CNPJ: {resultado}")
+                    return resultado
+                print(f"⚠️ Nenhum fornecedor encontrado com CNPJ={cnpj}")
                 return None
         except Exception as e:
             print(f"❌ Erro em FornecedorDAO.buscar_por_cnpj: {str(e)}")
