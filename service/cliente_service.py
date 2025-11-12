@@ -93,7 +93,9 @@ class ClienteService:
         Returns:
             list: Lista de clientes com dados completos
         """
-        return self.cliente_dao.listar_todos(apenas_ativos)
+        if apenas_ativos:
+            return self.cliente_dao.listar_clientes_ativos()
+        return self.cliente_dao.listar_todos()
     
     def buscar_cliente(self, id_cliente):
         """
