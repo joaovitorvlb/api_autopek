@@ -75,17 +75,17 @@ class FornecedorDAO:
                 print(f"   Row fetchone: {row}")
                 print(f"   Row type: {type(row)}")
                 if row:
-                    # MySQL retorna tupla, então precisamos converter para dict
+                    # Cursor já retorna dictionary=True, então row já é um dict
                     resultado = {
-                        'id_fornecedor': row[0],
-                        'razao_social': row[1],
-                        'nome_fantasia': row[2],
-                        'cnpj': row[3],
-                        'email': row[4],
-                        'telefone': row[5],
-                        'endereco': row[6],
-                        'ativo': bool(row[7]),
-                        'data_criacao': row[8].isoformat() if row[8] else None
+                        'id_fornecedor': row['id_fornecedor'],
+                        'razao_social': row['razao_social'],
+                        'nome_fantasia': row['nome_fantasia'],
+                        'cnpj': row['cnpj'],
+                        'email': row['email'],
+                        'telefone': row['telefone'],
+                        'endereco': row['endereco'],
+                        'ativo': bool(row['ativo']),
+                        'data_criacao': row['data_criacao'].isoformat() if row['data_criacao'] else None
                     }
                     print(f"✅ Fornecedor encontrado: {resultado}")
                     return resultado
@@ -127,15 +127,15 @@ class FornecedorDAO:
                 print(f"   Row: {row}")
                 if row:
                     resultado = {
-                        'id_fornecedor': row[0],
-                        'razao_social': row[1],
-                        'nome_fantasia': row[2],
-                        'cnpj': row[3],
-                        'email': row[4],
-                        'telefone': row[5],
-                        'endereco': row[6],
-                        'ativo': bool(row[7]),
-                        'data_criacao': row[8].isoformat() if row[8] else None
+                        'id_fornecedor': row['id_fornecedor'],
+                        'razao_social': row['razao_social'],
+                        'nome_fantasia': row['nome_fantasia'],
+                        'cnpj': row['cnpj'],
+                        'email': row['email'],
+                        'telefone': row['telefone'],
+                        'endereco': row['endereco'],
+                        'ativo': bool(row['ativo']),
+                        'data_criacao': row['data_criacao'].isoformat() if row['data_criacao'] else None
                     }
                     print(f"✅ Fornecedor encontrado por CNPJ: {resultado}")
                     return resultado
@@ -177,15 +177,15 @@ class FornecedorDAO:
                 
                 rows = cursor.fetchall()
                 return [{
-                    'id_fornecedor': row[0],
-                    'razao_social': row[1],
-                    'nome_fantasia': row[2],
-                    'cnpj': row[3],
-                    'email': row[4],
-                    'telefone': row[5],
-                    'endereco': row[6],
-                    'ativo': bool(row[7]),
-                    'data_criacao': row[8].isoformat() if row[8] else None
+                    'id_fornecedor': row['id_fornecedor'],
+                    'razao_social': row['razao_social'],
+                    'nome_fantasia': row['nome_fantasia'],
+                    'cnpj': row['cnpj'],
+                    'email': row['email'],
+                    'telefone': row['telefone'],
+                    'endereco': row['endereco'],
+                    'ativo': bool(row['ativo']),
+                    'data_criacao': row['data_criacao'].isoformat() if row['data_criacao'] else None
                 } for row in rows]
         except Exception as e:
             print(f"❌ Erro em FornecedorDAO.listar_todos: {str(e)}")
@@ -225,15 +225,15 @@ class FornecedorDAO:
                 
                 rows = cursor.fetchall()
                 return [{
-                    'id_fornecedor': row[0],
-                    'razao_social': row[1],
-                    'nome_fantasia': row[2],
-                    'cnpj': row[3],
-                    'email': row[4],
-                    'telefone': row[5],
-                    'endereco': row[6],
-                    'ativo': bool(row[7]),
-                    'data_criacao': row[8].isoformat() if row[8] else None
+                    'id_fornecedor': row['id_fornecedor'],
+                    'razao_social': row['razao_social'],
+                    'nome_fantasia': row['nome_fantasia'],
+                    'cnpj': row['cnpj'],
+                    'email': row['email'],
+                    'telefone': row['telefone'],
+                    'endereco': row['endereco'],
+                    'ativo': bool(row['ativo']),
+                    'data_criacao': row['data_criacao'].isoformat() if row['data_criacao'] else None
                 } for row in rows]
         except Exception as e:
             print(f"❌ Erro em FornecedorDAO.buscar_por_nome: {str(e)}")
@@ -392,7 +392,7 @@ class FornecedorDAO:
                 """, (id_fornecedor,))
                 
                 row = cursor.fetchone()
-                return row[0] if row else 0
+                return row['total'] if row else 0
         except Exception as e:
             return 0
 
@@ -421,10 +421,10 @@ class FornecedorDAO:
                 row = cursor.fetchone()
                 if row:
                     return {
-                        'total_pedidos': row[0],
-                        'valor_total': float(row[1]) if row[1] else 0.0,
-                        'valor_medio': float(row[2]) if row[2] else 0.0,
-                        'ultima_compra': row[3].isoformat() if row[3] else None
+                        'total_pedidos': row['total_pedidos'],
+                        'valor_total': float(row['valor_total']) if row['valor_total'] else 0.0,
+                        'valor_medio': float(row['valor_medio']) if row['valor_medio'] else 0.0,
+                        'ultima_compra': row['ultima_compra'].isoformat() if row['ultima_compra'] else None
                     }
                 return None
         except Exception as e:
