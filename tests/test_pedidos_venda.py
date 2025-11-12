@@ -47,8 +47,9 @@ def setup():
     )
     
     if sucesso and response.status_code == 200:
-        clientes = response.json()
-        if isinstance(clientes, list) and len(clientes) > 0:
+        data = response.json()
+        clientes = data.get('clientes', [])
+        if clientes and len(clientes) > 0:
             # Usar o primeiro cliente disponível
             CLIENTE_ID = clientes[0]['id_cliente']
             print_sucesso(f"Usando cliente existente (ID: {CLIENTE_ID})")

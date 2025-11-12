@@ -47,8 +47,9 @@ def setup():
     )
     
     if sucesso and response.status_code == 200:
-        fornecedores = response.json()
-        if isinstance(fornecedores, list) and len(fornecedores) > 0:
+        data = response.json()
+        fornecedores = data.get('fornecedores', [])
+        if fornecedores and len(fornecedores) > 0:
             # Usar o primeiro fornecedor disponível
             FORNECEDOR_ID = fornecedores[0]['id_fornecedor']
             print_sucesso(f"Usando fornecedor existente (ID: {FORNECEDOR_ID})")
