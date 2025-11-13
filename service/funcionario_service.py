@@ -72,20 +72,30 @@ class FuncionarioService:
         """
         return self.funcionario_dao.listar_por_cargo(cargo)
     
-    def criar_funcionario_completo(self, nome, email, senha, cargo, salario, 
+    def criar_funcionario_completo(self, nome, cpf, email, senha, cargo, salario, 
                                    data_contratacao=None, telefone=None, 
-                                   nivel_acesso='funcionario'):
+                                   cep=None, logradouro=None, numero=None, 
+                                   bairro=None, cidade=None, estado=None,
+                                   data_nascimento=None, nivel_acesso='funcionario'):
         """
         Cria funcionário completo (usuario + funcionario).
         
         Args:
             nome (str): Nome do funcionário
+            cpf (str): CPF do funcionário (obrigatório)
             email (str): Email do funcionário
             senha (str): Senha em texto plano
             cargo (str): Cargo do funcionário
             salario (float): Salário do funcionário
             data_contratacao (str): Data de contratação (YYYY-MM-DD) - padrão hoje
             telefone (str): Telefone (opcional)
+            cep (str): CEP (opcional)
+            logradouro (str): Logradouro (opcional)
+            numero (str): Número (opcional)
+            bairro (str): Bairro (opcional)
+            cidade (str): Cidade (opcional)
+            estado (str): Estado (opcional)
+            data_nascimento (str): Data de nascimento (YYYY-MM-DD) (opcional)
             nivel_acesso (str): 'admin' ou 'funcionario' - padrão 'funcionario'
         
         Returns:
@@ -126,10 +136,18 @@ class FuncionarioService:
         # Criar usuário
         resultado_usuario = self.usuario_service.criar_usuario(
             nome=nome,
+            cpf=cpf,
             email=email,
             senha=senha,
             id_nivel_acesso=nivel['id_nivel_acesso'],
-            telefone=telefone
+            telefone=telefone,
+            cep=cep,
+            logradouro=logradouro,
+            numero=numero,
+            bairro=bairro,
+            cidade=cidade,
+            estado=estado,
+            data_nascimento=data_nascimento
         )
         
         if not resultado_usuario['success']:

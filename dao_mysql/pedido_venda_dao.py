@@ -58,7 +58,7 @@ class PedidoVendaDAO:
                         pv.total,
                         u_cliente.nome as cliente_nome,
                         u_cliente.email as cliente_email,
-                        c.cpf as cliente_cpf,
+                        u_cliente.cpf as cliente_cpf,
                         u_func.nome as funcionario_nome
                     FROM Pedido_Venda pv
                     JOIN Cliente c ON pv.id_cliente = c.id_cliente

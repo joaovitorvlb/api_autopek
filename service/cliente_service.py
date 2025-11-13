@@ -114,12 +114,14 @@ class ClienteService:
         Busca cliente por CPF.
         
         Args:
-            cpf (str): CPF do cliente
+            cpf (str): CPF do cliente (com ou sem formatação)
         
         Returns:
             dict: Dados completos do cliente ou None
         """
-        return self.cliente_dao.buscar_por_cpf(cpf)
+        # Formatar CPF antes de buscar (banco armazena formatado)
+        cpf_formatado = self.formatar_cpf(cpf)
+        return self.cliente_dao.buscar_por_cpf(cpf_formatado)
     
     def buscar_cliente_por_email(self, email):
         """
@@ -156,12 +158,14 @@ class ClienteService:
         # Formatar CPF
         cpf_formatado = self.formatar_cpf(cpf)
         
-        # Verificar se CPF já existe
-        if self.cliente_dao.verificar_cpf_existe(cpf_formatado):
+        # Verificar se CPF já existe (CPF agora está na tabela Usuario)
+        if self.usuario_dao.verificar_cpf_existe(cpf_formatado):
             return {'success': False, 'message': 'CPF já cadastrado'}
         
-        # Validar endereço
-        if not endereco or len(endereco.strip()) < 10:
+        # Validar endereço (NOTA: Na nova modelagem, endereço está em Usuario com campos separados)
+        # Aqui precisamos validar os campos de endereço individualmente
+        # Por enquanto, mantemos compatibilidade se 'endereco' for um campo único
+        if endereco and len(endereco.strip()) < 10:
             return {'success': False, 'message': 'Endereço deve ter no mínimo 10 caracteres'}
         
         # Buscar nível de acesso 'cliente'
@@ -169,13 +173,16 @@ class ClienteService:
         if not nivel:
             return {'success': False, 'message': 'Nível de acesso "cliente" não encontrado'}
         
-        # Criar usuário
+        # Criar usuário com CPF
+        # NOTA: Na nova modelagem, endereço precisa ser separado em campos (cep, logradouro, etc)
+        # Por enquanto, passamos o endereço completo - idealmente deveria ser separado no front-end
         resultado_usuario = self.usuario_service.criar_usuario(
             nome=nome,
             email=email,
             senha=senha,
             id_nivel_acesso=nivel['id_nivel_acesso'],
-            telefone=telefone
+            telefone=telefone,
+            cpf=cpf_formatado
         )
         
         if not resultado_usuario['success']:
@@ -183,12 +190,24 @@ class ClienteService:
         
         id_usuario = resultado_usuario['id_usuario']
         
-        # Criar cliente
+        # Atualizar endereço do usuário se fornecido
+        # TODO: Separar endereço em campos (cep, logradouro, numero, bairro, cidade, estado)
+        if endereco:
+            try:
+                # Por enquanto, armazena no campo 'logradouro' até front-end enviar separado
+                self.usuario_dao.atualizar(
+                    id_usuario=id_usuario,
+                    logradouro=endereco.strip()
+                )
+            except Exception as e:
+                # Continua mesmo se falhar atualização de endereço
+                pass
+        
+        # Criar cliente (Nova modelagem: só precisa id_usuario e origem_cadastro)
         try:
             id_cliente = self.cliente_dao.inserir(
                 id_usuario=id_usuario,
-                cpf=cpf_formatado,
-                endereco=endereco.strip()
+                origem_cadastro='loja_fisica'  # Default, pode ser parametrizado
             )
             
             return {
@@ -230,8 +249,9 @@ class ClienteService:
         
         id_usuario = cliente['id_usuario']
         
-        # Atualizar dados do cliente
+                # Atualizar dados do cliente (na nova modelagem, Cliente só tem origem_cadastro)
         if cpf is not None or endereco is not None:
+            # CPF e endereço agora são do Usuario, não do Cliente
             # Validar CPF se fornecido
             if cpf is not None:
                 validacao_cpf = self.validar_cpf(cpf)
@@ -240,8 +260,13 @@ class ClienteService:
                 
                 cpf_formatado = self.formatar_cpf(cpf)
                 
-                # Verificar se CPF já existe (excluindo o próprio cliente)
-                if self.cliente_dao.verificar_cpf_existe(cpf_formatado, id_cliente):
+                # Buscar o id_usuario do cliente
+                cliente = self.cliente_dao.buscar_por_id(id_cliente)
+                if not cliente:
+                    return {'success': False, 'message': 'Cliente não encontrado'}
+                
+                # Verificar se CPF já existe (excluindo o próprio usuário)
+                if self.usuario_dao.verificar_cpf_existe(cpf_formatado, cliente['id_usuario']):
                     return {'success': False, 'message': 'CPF já cadastrado'}
             else:
                 cpf_formatado = None
@@ -250,14 +275,16 @@ class ClienteService:
             if endereco is not None and len(endereco.strip()) < 10:
                 return {'success': False, 'message': 'Endereço deve ter no mínimo 10 caracteres'}
             
+            # Atualizar Usuario (CPF e endereço estão lá)
             try:
-                self.cliente_dao.atualizar(
-                    id_cliente=id_cliente,
-                    cpf=cpf_formatado,
-                    endereco=endereco.strip() if endereco else None
-                )
+                if cpf_formatado or endereco:
+                    self.usuario_dao.atualizar(
+                        id_usuario=cliente['id_usuario'],
+                        cpf=cpf_formatado,
+                        logradouro=endereco.strip() if endereco else None
+                    )
             except Exception as e:
-                return {'success': False, 'message': f'Erro ao atualizar cliente: {str(e)}'}
+                return {'success': False, 'message': f'Erro ao atualizar dados: {str(e)}'}
         
         # Atualizar dados do usuário
         if nome is not None or email is not None or telefone is not None:

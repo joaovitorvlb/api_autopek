@@ -59,8 +59,8 @@ class PedidoCompraDAO:
                         u.nome as funcionario_nome
                     FROM Pedido_Compra pc
                     JOIN Fornecedor f ON pc.id_fornecedor = f.id_fornecedor
-                    JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
-                    JOIN Usuario u ON func.id_usuario = u.id_usuario
+                    LEFT JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
+                    LEFT JOIN usuario u ON func.id_usuario = u.id_usuario
                     WHERE pc.id_pedido_compra = %s
                 """
                 params = (id_pedido_compra,)
@@ -98,8 +98,8 @@ class PedidoCompraDAO:
                         u.nome as funcionario_nome
                     FROM Pedido_Compra pc
                     JOIN Fornecedor f ON pc.id_fornecedor = f.id_fornecedor
-                    JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
-                    JOIN Usuario u ON func.id_usuario = u.id_usuario
+                    LEFT JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
+                    LEFT JOIN usuario u ON func.id_usuario = u.id_usuario
                 """
                 
                 if status:
@@ -137,8 +137,8 @@ class PedidoCompraDAO:
                         u.nome as funcionario_nome
                     FROM Pedido_Compra pc
                     JOIN Fornecedor f ON pc.id_fornecedor = f.id_fornecedor
-                    JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
-                    JOIN Usuario u ON func.id_usuario = u.id_usuario
+                    LEFT JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
+                    LEFT JOIN usuario u ON func.id_usuario = u.id_usuario
                     WHERE pc.id_fornecedor = %s
                     ORDER BY pc.data_pedido DESC
                 """
@@ -172,8 +172,8 @@ class PedidoCompraDAO:
                         u.nome as funcionario_nome
                     FROM Pedido_Compra pc
                     JOIN Fornecedor f ON pc.id_fornecedor = f.id_fornecedor
-                    JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
-                    JOIN Usuario u ON func.id_usuario = u.id_usuario
+                    LEFT JOIN Funcionario func ON pc.id_funcionario = func.id_funcionario
+                    LEFT JOIN usuario u ON func.id_usuario = u.id_usuario
                     WHERE pc.id_funcionario = %s
                     ORDER BY pc.data_pedido DESC
                 """

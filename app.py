@@ -8,10 +8,15 @@ Credenciais padrão para primeiro acesso:
 ⚠️  IMPORTANTE: Altere a senha após o primeiro login!
 """
 
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Importar blueprints
 from routes import (

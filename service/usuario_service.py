@@ -118,7 +118,9 @@ class UsuarioService:
         """
         return self.usuario_dao.buscar_por_email(email)
     
-    def criar_usuario(self, nome, email, senha, id_nivel_acesso, telefone=None):
+    def criar_usuario(self, nome, email, senha, id_nivel_acesso, telefone=None, cpf=None,
+                     cep=None, logradouro=None, numero=None, bairro=None, cidade=None, estado=None,
+                     data_nascimento=None):
         """
         Cria novo usuário com validações.
         
@@ -128,6 +130,14 @@ class UsuarioService:
             senha (str): Senha em texto plano
             id_nivel_acesso (int): ID do nível de acesso
             telefone (str): Telefone (opcional)
+            cpf (str): CPF (opcional - obrigatório para clientes/funcionários)
+            cep (str): CEP (opcional)
+            logradouro (str): Logradouro (opcional)
+            numero (str): Número (opcional)
+            bairro (str): Bairro (opcional)
+            cidade (str): Cidade (opcional)
+            estado (str): Estado/UF (opcional)
+            data_nascimento (date): Data de nascimento (opcional)
         
         Returns:
             dict: {'success': bool, 'id_usuario': int, 'message': str}
@@ -143,6 +153,11 @@ class UsuarioService:
         # Verificar se email já existe
         if self.usuario_dao.verificar_email_existe(email):
             return {'success': False, 'message': 'Email já cadastrado'}
+        
+        # Validar CPF se fornecido
+        if cpf:
+            if self.usuario_dao.verificar_cpf_existe(cpf):
+                return {'success': False, 'message': 'CPF já cadastrado'}
         
         # Validar senha
         validacao_senha = self.validar_senha(senha)
@@ -165,10 +180,18 @@ class UsuarioService:
         try:
             id_usuario = self.usuario_dao.inserir(
                 nome=nome.strip(),
+                cpf=cpf,
                 email=email.lower().strip(),
                 senha_hash=senha_hash,
                 id_nivel_acesso=id_nivel_acesso,
                 telefone=telefone,
+                cep=cep,
+                logradouro=logradouro,
+                numero=numero,
+                bairro=bairro,
+                cidade=cidade,
+                estado=estado,
+                data_nascimento=data_nascimento,
                 ativo=True
             )
             

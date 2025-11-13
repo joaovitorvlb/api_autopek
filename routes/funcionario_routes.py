@@ -30,12 +30,20 @@ def criar_funcionario(usuario_atual):
     Request body:
     {
         "nome": "Maria Santos",
+        "cpf": "123.456.789-00",
         "email": "maria@autopeck.com",
         "senha": "senha123",
         "cargo": "Vendedor",
         "salario": 3500.00,
         "data_contratacao": "2024-01-15",
         "telefone": "11988887777",
+        "cep": "12345-678",
+        "logradouro": "Rua Exemplo",
+        "numero": "100",
+        "bairro": "Centro",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "data_nascimento": "1990-01-01",
         "nivel_acesso": "funcionario"
     }
     """
@@ -47,6 +55,7 @@ def criar_funcionario(usuario_atual):
         
         # Extrair dados
         nome = dados.get('nome')
+        cpf = dados.get('cpf')
         email = dados.get('email')
         senha = dados.get('senha')
         cargo = dados.get('cargo')
@@ -55,22 +64,39 @@ def criar_funcionario(usuario_atual):
         telefone = dados.get('telefone')
         nivel_acesso = dados.get('nivel_acesso', 'funcionario')
         
+        # Dados de endereço (opcionais)
+        cep = dados.get('cep')
+        logradouro = dados.get('logradouro')
+        numero = dados.get('numero')
+        bairro = dados.get('bairro')
+        cidade = dados.get('cidade')
+        estado = dados.get('estado')
+        data_nascimento = dados.get('data_nascimento')
+        
         # Validar campos obrigatórios
-        if not all([nome, email, senha, cargo, salario]):
+        if not all([nome, cpf, email, senha, cargo, salario]):
             return jsonify({
                 'success': False,
-                'message': 'Campos obrigatórios: nome, email, senha, cargo, salario'
+                'message': 'Campos obrigatórios: nome, cpf, email, senha, cargo, salario'
             }), 400
         
         # Criar funcionário
         resultado = funcionario_service.criar_funcionario_completo(
             nome=nome,
+            cpf=cpf,
             email=email,
             senha=senha,
             cargo=cargo,
             salario=salario,
             data_contratacao=data_contratacao,
             telefone=telefone,
+            cep=cep,
+            logradouro=logradouro,
+            numero=numero,
+            bairro=bairro,
+            cidade=cidade,
+            estado=estado,
+            data_nascimento=data_nascimento,
             nivel_acesso=nivel_acesso
         )
         

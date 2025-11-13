@@ -391,8 +391,24 @@ def resetar_banco_mysql():
             
             print("  ✅ Usuário admin criado (email: admin@autopeck.com, senha: admin123)")
             print("  ✅ Funcionário admin criado (vinculado ao usuário)")
+            
+            # Criar cliente de teste para testes automatizados
+            cur.execute("""
+                INSERT INTO usuario (nome, cpf, email, senha_hash, telefone, ativo, id_nivel_acesso)
+                VALUES ('Cliente Teste', '155.853.159-94', 'cliente@test.com', %s, '11988888888', 1,
+                        (SELECT id_nivel_acesso FROM nivel_acesso WHERE nome = 'cliente'))
+            """, (senha_hash,))
+            
+            id_usuario_cliente = cur.lastrowid
+            
+            # Criar cliente vinculado
+            cur.execute("""
+                INSERT INTO Cliente (id_usuario, data_cadastro, origem_cadastro)
+                VALUES (%s, NOW(), 'loja_fisica')
+            """, (id_usuario_cliente,))
+            
+            print("  ✅ Cliente de teste criado (email: cliente@test.com, senha: admin123, CPF: 155.853.159-94)")
             print("  ⚠️  IMPORTANTE: Altere a senha do admin após o primeiro login!")
-            print("  ℹ️  Todas as outras tabelas estão vazias")
         
         print("\n✅ Banco de dados resetado com sucesso!")
         return True
@@ -483,16 +499,24 @@ def confirmar_acao():
     
     return resposta.strip().upper() == 'SIM'
 
-def main():
-    """Função principal"""
+def main(auto_confirm=False):
+    """
+    Função principal
+    
+    Args:
+        auto_confirm (bool): Se True, pula a confirmação do usuário (para testes automatizados)
+    """
     print("\n🧹 Script de Limpeza - Ambiente de Produção")
     print("="*60)
     
-    # Confirmar ação
-    if not confirmar_acao():
-        print("\n❌ Operação cancelada pelo usuário.")
-        print("   Nenhuma alteração foi feita.")
-        sys.exit(0)
+    # Confirmar ação (pular se auto_confirm=True)
+    if not auto_confirm:
+        if not confirmar_acao():
+            print("\n❌ Operação cancelada pelo usuário.")
+            print("   Nenhuma alteração foi feita.")
+            sys.exit(0)
+    else:
+        print("\n⚙️  Modo automático ativado (testes)")
     
     print("\n🚀 Iniciando limpeza...")
     
@@ -506,19 +530,21 @@ def main():
         print("\n" + "="*60)
         print("✅ LIMPEZA CONCLUÍDA COM SUCESSO!")
         print("="*60)
-        print("\n📋 Próximos passos:")
-        print("  1. Fazer reload da aplicação no PythonAnywhere")
-        print("  2. Testar login com usuário padrão")
-        print("  3. Verificar se produtos estão listando corretamente")
-        print("\n💡 Usuário padrão para primeiro login:")
-        print("  - Email: admin@autopeck.com")
-        print("  - Senha: admin123")
-        print("  ⚠️  IMPORTANTE: Altere a senha após o primeiro login!")
-        print("\n")
+        if not auto_confirm:
+            print("\n📋 Próximos passos:")
+            print("  1. Fazer reload da aplicação no PythonAnywhere")
+            print("  2. Testar login com usuário padrão")
+            print("  3. Verificar se produtos estão listando corretamente")
+            print("\n💡 Usuário padrão para primeiro login:")
+            print("  - Email: admin@autopeck.com")
+            print("  - Senha: admin123")
+            print("  ⚠️  IMPORTANTE: Altere a senha após o primeiro login!")
+            print("\n")
     else:
         print("\n❌ Erro durante a limpeza.")
         print("   Verifique os logs acima para mais detalhes.")
-        sys.exit(1)
+        if not auto_confirm:
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

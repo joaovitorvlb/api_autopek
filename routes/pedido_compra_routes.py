@@ -7,6 +7,7 @@ from flask import Blueprint, request, jsonify
 from dao_mysql.pedido_compra_dao import PedidoCompraDAO
 from dao_mysql.item_pedido_compra_dao import ItemPedidoCompraDAO
 from dao_mysql.fornecedor_dao import FornecedorDAO
+from dao_mysql.funcionario_dao import FuncionarioDAO
 from dao_mysql.produto_dao import ProdutoDAO
 from service.pedido_compra_service import PedidoCompraService
 from service.auth_service import token_required, funcionario_required
@@ -17,6 +18,7 @@ pedido_compra_bp = Blueprint('pedido_compra', __name__, url_prefix='/api/pedidos
 pedido_compra_dao = PedidoCompraDAO()
 item_pedido_compra_dao = ItemPedidoCompraDAO()
 fornecedor_dao = FornecedorDAO()
+funcionario_dao = FuncionarioDAO()
 produto_dao = ProdutoDAO()
 
 pedido_compra_service = PedidoCompraService(
@@ -72,8 +74,15 @@ def criar_pedido_compra(usuario_atual):
                 'message': 'Campo "id_fornecedor" é obrigatório'
             }), 400
         
-        # ID do funcionário é o usuário autenticado
-        id_funcionario = usuario_atual['id_usuario']
+        # Buscar funcionário pelo id_usuario
+        funcionario = funcionario_dao.buscar_por_usuario(usuario_atual['id_usuario'])
+        if not funcionario:
+            return jsonify({
+                'success': False,
+                'message': 'Usuário não é um funcionário'
+            }), 403
+        
+        id_funcionario = funcionario['id_funcionario']
         
         # Criar pedido com itens
         resultado = pedido_compra_service.criar_pedido_compra(

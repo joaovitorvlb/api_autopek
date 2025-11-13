@@ -105,7 +105,7 @@ class UsuarioDAO:
     
     def atualizar(self, id_usuario, nome=None, cpf=None, email=None, telefone=None, 
                   id_nivel_acesso=None, data_nascimento=None, cep=None, logradouro=None, 
-                  numero=None, bairro=None, cidade=None, estado=None):
+                  numero=None, bairro=None, cidade=None, estado=None, ativo=None):
         """Atualiza dados do usuário (exceto senha e ultimo_login)"""
         campos = []
         valores = []
@@ -146,6 +146,9 @@ class UsuarioDAO:
         if estado is not None:
             campos.append("estado = %s")
             valores.append(estado)
+        if ativo is not None:
+            campos.append("ativo = %s")
+            valores.append(ativo)
         
         if not campos:
             return 0
