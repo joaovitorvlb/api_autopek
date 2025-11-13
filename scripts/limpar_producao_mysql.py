@@ -113,6 +113,7 @@ def resetar_banco_mysql():
             cur.execute("DROP TABLE IF EXISTS Produto")
             cur.execute("DROP TABLE IF EXISTS Cliente")
             cur.execute("DROP TABLE IF EXISTS Funcionario")
+            cur.execute("DROP TABLE IF EXISTS Departamento")
             cur.execute("DROP TABLE IF EXISTS usuario")
             cur.execute("DROP TABLE IF EXISTS nivel_acesso")
             cur.execute("DROP TABLE IF EXISTS token_blacklist")
@@ -132,17 +133,27 @@ def resetar_banco_mysql():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """)
             
-            # Tabela usuario (Base para herança)
+            # Tabela usuario (Base para herança - NOVA MODELAGEM)
             cur.execute("""
                 CREATE TABLE usuario (
                     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
                     nome VARCHAR(100) NOT NULL,
+                    cpf VARCHAR(14) NOT NULL UNIQUE COMMENT 'CPF no formato XXX.XXX.XXX-XX',
                     email VARCHAR(100) NOT NULL UNIQUE,
                     senha_hash VARCHAR(255) NOT NULL,
                     telefone VARCHAR(20),
+                    cep VARCHAR(10) COMMENT 'Endereço: CEP',
+                    logradouro VARCHAR(255) COMMENT 'Endereço: Rua/Avenida',
+                    numero VARCHAR(20) COMMENT 'Endereço: Número',
+                    bairro VARCHAR(100) COMMENT 'Endereço: Bairro',
+                    cidade VARCHAR(100) COMMENT 'Endereço: Cidade',
+                    estado VARCHAR(2) COMMENT 'Endereço: Estado (UF)',
+                    data_nascimento DATE COMMENT 'Data de nascimento',
                     ativo BOOLEAN DEFAULT 1 COMMENT '1=Ativo, 0=Inativo',
                     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ultimo_login DATETIME COMMENT 'Data/hora do último login',
                     id_nivel_acesso INT NOT NULL,
+                    KEY idx_usuario_cpf (cpf),
                     KEY idx_usuario_email (email),
                     KEY idx_usuario_ativo (ativo),
                     CONSTRAINT fk_usuario_nivel
@@ -152,14 +163,14 @@ def resetar_banco_mysql():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """)
             
-            # Tabela Cliente (herda de Usuario - 1-para-1)
+            # Tabela Cliente (herda de Usuario - 1-para-1 - NOVA MODELAGEM)
             cur.execute("""
                 CREATE TABLE Cliente (
                     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
                     id_usuario INT NOT NULL UNIQUE COMMENT 'FK para Usuario (1-para-1)',
-                    cpf VARCHAR(14) NOT NULL UNIQUE COMMENT 'CPF no formato XXX.XXX.XXX-XX',
-                    endereco TEXT,
-                    KEY idx_cliente_cpf (cpf),
+                    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Data de cadastro no sistema',
+                    origem_cadastro VARCHAR(50) DEFAULT 'loja_fisica' COMMENT 'loja_fisica, site, app_mobile',
+                    KEY idx_cliente_origem (origem_cadastro),
                     CONSTRAINT fk_cliente_usuario
                         FOREIGN KEY (id_usuario) 
                         REFERENCES usuario(id_usuario)
@@ -167,7 +178,17 @@ def resetar_banco_mysql():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """)
             
-            # Tabela Funcionario (herda de Usuario - 1-para-1)
+            # Tabela Departamento (NOVA TABELA - NOVA MODELAGEM)
+            cur.execute("""
+                CREATE TABLE Departamento (
+                    id_departamento INT AUTO_INCREMENT PRIMARY KEY,
+                    nome VARCHAR(100) NOT NULL UNIQUE COMMENT 'Nome do departamento',
+                    centro_custo VARCHAR(50) UNIQUE COMMENT 'Código do centro de custo',
+                    KEY idx_departamento_nome (nome)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            
+            # Tabela Funcionario (herda de Usuario - 1-para-1 - NOVA MODELAGEM)
             cur.execute("""
                 CREATE TABLE Funcionario (
                     id_funcionario INT AUTO_INCREMENT PRIMARY KEY,
@@ -175,11 +196,17 @@ def resetar_banco_mysql():
                     cargo VARCHAR(100),
                     salario DECIMAL(10,2),
                     data_contratacao DATE,
+                    id_departamento INT COMMENT 'FK para Departamento',
                     KEY idx_funcionario_cargo (cargo),
+                    KEY idx_funcionario_departamento (id_departamento),
                     CONSTRAINT fk_funcionario_usuario
                         FOREIGN KEY (id_usuario) 
                         REFERENCES usuario(id_usuario)
-                        ON DELETE CASCADE
+                        ON DELETE CASCADE,
+                    CONSTRAINT fk_funcionario_departamento
+                        FOREIGN KEY (id_departamento) 
+                        REFERENCES Departamento(id_departamento)
+                        ON DELETE SET NULL
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """)
             
@@ -324,7 +351,7 @@ def resetar_banco_mysql():
             # 3. Inserir dados padrão
             print("  📝 Inserindo dados padrão...")
             
-            # Níveis de acesso (único dado padrão)
+            # Níveis de acesso
             cur.execute("""
                 INSERT INTO nivel_acesso (nome) VALUES
                 ('admin'),
@@ -333,23 +360,33 @@ def resetar_banco_mysql():
             """)
             print("  ✅ Níveis de acesso inseridos")
             
+            # Departamentos padrão
+            cur.execute("""
+                INSERT INTO Departamento (nome, centro_custo) VALUES
+                ('Administrativo', 'CC-001'),
+                ('Vendas', 'CC-002'),
+                ('Compras', 'CC-003')
+            """)
+            print("  ✅ Departamentos padrão inseridos")
+            
             # Criar usuário admin padrão
             senha_padrao = "admin123"  # Senha padrão
             senha_hash = hashlib.sha256(senha_padrao.encode()).hexdigest()
             
             cur.execute("""
-                INSERT INTO usuario (nome, email, senha_hash, telefone, ativo, id_nivel_acesso)
-                VALUES ('Administrador', 'admin@autopeck.com', %s, '11999999999', 1, 
+                INSERT INTO usuario (nome, cpf, email, senha_hash, telefone, ativo, id_nivel_acesso)
+                VALUES ('Administrador', '000.000.000-00', 'admin@autopeck.com', %s, '11999999999', 1, 
                         (SELECT id_nivel_acesso FROM nivel_acesso WHERE nome = 'admin'))
             """, (senha_hash,))
             
             # Obter ID do usuário admin usando lastrowid
             id_usuario_admin = cur.lastrowid
             
-            # Criar funcionário vinculado ao admin (para pedidos de compra)
+            # Criar funcionário vinculado ao admin (departamento Administrativo)
             cur.execute("""
-                INSERT INTO Funcionario (id_usuario, cargo, salario, data_contratacao)
-                VALUES (%s, 'Administrador', 0.0, CURDATE())
+                INSERT INTO Funcionario (id_usuario, cargo, salario, data_contratacao, id_departamento)
+                VALUES (%s, 'Administrador', 0.0, CURDATE(),
+                        (SELECT id_departamento FROM Departamento WHERE nome = 'Administrativo'))
             """, (id_usuario_admin,))
             
             print("  ✅ Usuário admin criado (email: admin@autopeck.com, senha: admin123)")

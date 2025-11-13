@@ -39,6 +39,12 @@ class NivelAcessoDAO:
                 (nome,),
             )
             return cur.fetchone()
+    
+    def buscar_por_nome(self, nome):
+        """
+        Alias para buscar_nivel_acesso_por_nome (compatibilidade com testes).
+        """
+        return self.buscar_nivel_acesso_por_nome(nome)
 
     def inserir(self, nome):
         """
