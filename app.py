@@ -101,8 +101,10 @@ def create_app():
             print(f"   Erro: {e}")
             init_sqlite()  # Fallback para SQLite (desenvolvimento)
     else:
-        print("ℹ️  Usando SQLite (USE_MYSQL=false no .env)")
-        init_sqlite()
+       #print("ℹ️  Usando SQLite (USE_MYSQL=false no .env)")
+        #init_sqlite()
+
+        pass
     
     # Registrar teardown para fechar conexão ao fim da requisição
     app.teardown_appcontext(close_db_connection)
