@@ -49,7 +49,9 @@ def limpar_imagens():
     
     if not os.path.exists(upload_folder):
         print(f"⚠️  Diretório não encontrado: {upload_folder}")
-        return
+        print(f"🔧 Criando diretório: {upload_folder}")
+        os.makedirs(upload_folder, exist_ok=True)
+        print(f"✅ Diretório criado!")
     
     removidos = 0
     erros = 0
