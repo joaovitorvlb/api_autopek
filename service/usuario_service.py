@@ -204,7 +204,9 @@ class UsuarioService:
             return {'success': False, 'message': f'Erro ao criar usuário: {str(e)}'}
     
     def atualizar_usuario(self, id_usuario, nome=None, email=None, telefone=None, 
-                         id_nivel_acesso=None, ativo=None):
+                         id_nivel_acesso=None, ativo=None, cpf=None, cep=None, 
+                         logradouro=None, numero=None, bairro=None, cidade=None, 
+                         estado=None, data_nascimento=None):
         """
         Atualiza dados do usuário.
         
@@ -215,6 +217,14 @@ class UsuarioService:
             telefone (str): Telefone (opcional)
             id_nivel_acesso (int): ID do nível de acesso (opcional)
             ativo (bool): Status ativo (opcional)
+            cpf (str): CPF (opcional)
+            cep (str): CEP (opcional)
+            logradouro (str): Logradouro (opcional)
+            numero (str): Número (opcional)
+            bairro (str): Bairro (opcional)
+            cidade (str): Cidade (opcional)
+            estado (str): Estado (opcional)
+            data_nascimento (str): Data de nascimento YYYY-MM-DD (opcional)
         
         Returns:
             dict: {'success': bool, 'message': str}
@@ -237,6 +247,11 @@ class UsuarioService:
             if self.usuario_dao.verificar_email_existe(email, id_usuario):
                 return {'success': False, 'message': 'Email já cadastrado'}
         
+        # Validar CPF se fornecido
+        if cpf is not None:
+            if self.usuario_dao.verificar_cpf_existe(cpf, id_usuario):
+                return {'success': False, 'message': 'CPF já cadastrado'}
+        
         # Validar telefone se fornecido
         if telefone is not None and not self.validar_telefone(telefone):
             return {'success': False, 'message': 'Telefone inválido'}
@@ -255,7 +270,15 @@ class UsuarioService:
                 email=email.lower().strip() if email else None,
                 telefone=telefone,
                 id_nivel_acesso=id_nivel_acesso,
-                ativo=ativo
+                ativo=ativo,
+                cpf=cpf,
+                cep=cep,
+                logradouro=logradouro,
+                numero=numero,
+                bairro=bairro,
+                cidade=cidade,
+                estado=estado,
+                data_nascimento=data_nascimento
             )
             
             return {'success': True, 'message': 'Usuário atualizado com sucesso'}

@@ -85,12 +85,24 @@ def create_app():
         return {'message': 'Token foi revogado (logout realizado)'}, 401
     
     # Inicializar bancos de dados
-    try:
-        init_mysql()  # Tenta MySQL primeiro (produção)
-        print("✅ MySQL inicializado com sucesso")
-    except Exception as e:
-        print(f"⚠️  MySQL não disponível, usando SQLite: {e}")
-        init_sqlite()  # Fallback para SQLite (desenvolvimento)
+    usar_mysql = os.getenv('USE_MYSQL', 'true').lower() == 'true'
+    
+    if usar_mysql:
+        try:
+            init_mysql()  # Tenta MySQL primeiro (produção)
+            # Testar conexão
+            from dao_mysql.db_pythonanywhere import test_connection
+            if test_connection():
+                print("✅ MySQL inicializado e testado com sucesso")
+            else:
+                raise Exception("Teste de conexão falhou")
+        except Exception as e:
+            print(f"⚠️  MySQL não disponível, usando SQLite")
+            print(f"   Erro: {e}")
+            init_sqlite()  # Fallback para SQLite (desenvolvimento)
+    else:
+        print("ℹ️  Usando SQLite (USE_MYSQL=false no .env)")
+        init_sqlite()
     
     # Registrar teardown para fechar conexão ao fim da requisição
     app.teardown_appcontext(close_db_connection)

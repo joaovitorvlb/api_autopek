@@ -31,8 +31,15 @@ def registrar_cliente():
         "email": "joao.silva@email.com",
         "senha": "senha123",
         "cpf": "123.456.789-00",
-        "endereco": "Rua A, 123",
-        "telefone": "11999999999"
+        "telefone": "11999999999",
+        "cep": "01310-100",
+        "logradouro": "Av. Paulista",
+        "numero": "1578",
+        "bairro": "Bela Vista",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "data_nascimento": "1990-05-15",
+        "origem_cadastro": "site"
     }
     """
     try:
@@ -41,20 +48,29 @@ def registrar_cliente():
         if not dados:
             return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
         
-        # Extrair dados
+        # Extrair dados obrigatórios
         nome = dados.get('nome')
         email = dados.get('email')
         senha = dados.get('senha')
         cpf = dados.get('cpf')
-        endereco = dados.get('endereco')
-        telefone = dados.get('telefone')
         
         # Validar campos obrigatórios
-        if not all([nome, email, senha, cpf, endereco]):
+        if not all([nome, email, senha, cpf]):
             return jsonify({
                 'success': False,
-                'message': 'Campos obrigatórios: nome, email, senha, cpf, endereco'
+                'message': 'Campos obrigatórios: nome, email, senha, cpf'
             }), 400
+        
+        # Extrair dados opcionais
+        telefone = dados.get('telefone')
+        cep = dados.get('cep')
+        logradouro = dados.get('logradouro')
+        numero = dados.get('numero')
+        bairro = dados.get('bairro')
+        cidade = dados.get('cidade')
+        estado = dados.get('estado')
+        data_nascimento = dados.get('data_nascimento')
+        origem_cadastro = dados.get('origem_cadastro', 'site')  # Default: 'site'
         
         # Criar cliente
         resultado = cliente_service.criar_cliente_completo(
@@ -62,8 +78,15 @@ def registrar_cliente():
             email=email,
             senha=senha,
             cpf=cpf,
-            endereco=endereco,
-            telefone=telefone
+            telefone=telefone,
+            cep=cep,
+            logradouro=logradouro,
+            numero=numero,
+            bairro=bairro,
+            cidade=cidade,
+            estado=estado,
+            data_nascimento=data_nascimento,
+            origem_cadastro=origem_cadastro
         )
         
         if resultado['success']:
@@ -179,7 +202,13 @@ def atualizar_cliente(usuario_atual, id_cliente):
         "email": "joao.novo@email.com",
         "telefone": "11988887777",
         "cpf": "987.654.321-00",
-        "endereco": "Rua B, 456"
+        "cep": "01310-100",
+        "logradouro": "Av. Paulista",
+        "numero": "2000",
+        "bairro": "Bela Vista",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "data_nascimento": "1995-03-20"
     }
     """
     try:
@@ -204,11 +233,17 @@ def atualizar_cliente(usuario_atual, id_cliente):
         # Atualizar cliente
         resultado = cliente_service.atualizar_cliente(
             id_cliente=id_cliente,
-            cpf=dados.get('cpf'),
-            endereco=dados.get('endereco'),
             nome=dados.get('nome'),
             email=dados.get('email'),
-            telefone=dados.get('telefone')
+            cpf=dados.get('cpf'),
+            telefone=dados.get('telefone'),
+            cep=dados.get('cep'),
+            logradouro=dados.get('logradouro'),
+            numero=dados.get('numero'),
+            bairro=dados.get('bairro'),
+            cidade=dados.get('cidade'),
+            estado=dados.get('estado'),
+            data_nascimento=dados.get('data_nascimento')
         )
         
         return jsonify(resultado), 200 if resultado['success'] else 400
